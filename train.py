@@ -8,7 +8,7 @@ import torch
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from deepspeed import deepspeed
+import deepspeed
 import torch.nn as nn
 
 import ipc
