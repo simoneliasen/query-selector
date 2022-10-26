@@ -17,6 +17,8 @@ from model import Transformer
 from data_loader import Dataset_ETT_hour, Dataset_ETT_minute
 from metrics import metric
 
+import matplotlib.pyplot as plt
+
 
 def get_model(args):
     return Transformer(args.embedding_size, args.hidden_size, args.input_len, args.dec_seq_len, args.pred_len,
@@ -182,6 +184,17 @@ def preform_experiment(args):
         ipc.sendResults(mse, mae)
         if args.debug:
             plot_model(args, model)
+            
+    #Plot results
+    plt.plot(
+      [5, 4, 3], 
+      [100, 200, 300] 
+      )
+    plt.title('Some Title')
+    plt.xlabel('Year')
+    plt.ylabel('Some measurements')
+    plt.savefig('my_plot.png')
+    plt.close()
 
 def main():
     parser = build_parser()
