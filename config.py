@@ -2,7 +2,7 @@ import argparse
 import sys
 import json
 
-from deepspeed import deepspeed
+import deepspeed
 
 
 class Config:
