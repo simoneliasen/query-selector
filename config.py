@@ -61,7 +61,7 @@ class Config:
             sys.argv.extend(["--input_len", '1', "--output_len", "1"])
         elif self.prediction_type == 'multi':
             sys.argv.extend(["--features", 'M'])
-            sys.argv.extend(["--input_len", '7', "--output_len", "7"])
+            sys.argv.extend(["--input_len", '3', "--output_len", "3"])
 
         else:
             raise NotImplemented
@@ -105,7 +105,7 @@ class Config:
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, choices=['ETTh1', 'ETTh2', 'ETTm1'], required=True)
+    parser.add_argument('--data', type=str, choices=['ETTh1', 'new_hub', 'ETTh2', 'ETTm1'], required=True)
     parser.add_argument('--input_len', type=int, required=True)
     parser.add_argument('--output_len', type=int, required=True)
     parser.add_argument('--seq_len', type=int, required=True)
