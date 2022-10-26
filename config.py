@@ -61,7 +61,7 @@ class Config:
             sys.argv.extend(["--input_len", '1', "--output_len", "1"])
         elif self.prediction_type == 'multi':
             sys.argv.extend(["--features", 'M'])
-            sys.argv.extend(["--input_len", '3', "--output_len", "3"])
+            sys.argv.extend(["--input_len", '7', "--output_len", "7"])
 
         else:
             raise NotImplemented
