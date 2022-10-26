@@ -184,15 +184,37 @@ def preform_experiment(args):
         ipc.sendResults(mse, mae)
         if args.debug:
             plot_model(args, model)
-            
-    #Plot results
-    plt.plot(
-      [5, 4, 3], 
-      [100, 200, 300] 
-      )
-    plt.title('Some Title')
-    plt.xlabel('Year')
-    plt.ylabel('Some measurements')
+     
+    #Plot prediction + truth data.
+    
+    #Get prediction values
+    featurepred1 = []
+    for feature in v_preds[0][0]:
+      featurepred1.append(feature[0])
+    print("prediction" + str(featurepred1))
+
+    #Get truth values
+    featuretrue1 = []
+    for feature in v_trues[0][0]:
+      featuretrue1.append(feature[0])
+    print("truth" + str(featuretrue1))
+
+    #Plot values       
+    x = [1, 2, 3, 4, 5, 6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+    y = featurepred1 
+    z = featuretrue1
+
+    #Plot a simple line chart
+    plt.plot(x, y, label='Prediction')
+
+    #Plot another line on the same chart/graph
+    plt.plot(x, z, label='Truth')
+
+    #Map titles, label and legends
+    plt.title('Prediction vs. Truth value')
+    plt.xlabel('Time')
+    plt.ylabel('Value')
+    plt.legend()
     plt.savefig('my_plot.png')
     plt.close()
 
