@@ -16,6 +16,6 @@
   "fp16": true,
   "deepspeed": true,
   "iterations": 5,
-  "exps": 5,
+  "exps": 2,
   "debug": false
 }
