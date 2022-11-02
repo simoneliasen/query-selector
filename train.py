@@ -187,6 +187,15 @@ def preform_experiment(args):
      
     #Plot prediction + truth data.
     
+    #Validation content
+    print("Feature count below")
+    print(len(v_preds[0][0][0])) #7 features
+    print("Timestep count below")
+    print(len(v_preds[0][0])) #24 timesteps
+    print("Batch_size below")
+    print(len(v_preds[0])) #32 batch_size
+    
+    
     #Get prediction values
     featurepred1 = []
     for feature in v_preds[0][0]:
