@@ -42,7 +42,7 @@ def _get_data(args, flag):
     if flag == 'test':
         shuffle_flag = False;
         drop_last = True;
-        batch_size = 32
+        batch_size = 1
         freq = args.freq
     elif flag == 'pred':
         shuffle_flag = False;
