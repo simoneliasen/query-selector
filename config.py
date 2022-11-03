@@ -105,7 +105,7 @@ class Config:
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, choices=['ETTh1', 'new_hub', 'ETTh2', 'ETTm1'], required=True)
+    parser.add_argument('--data', type=str, choices=['ETTh1', 'small_new', 'new', 'ETTh2', 'ETTm1'], required=True)
     parser.add_argument('--input_len', type=int, required=True)
     parser.add_argument('--output_len', type=int, required=True)
     parser.add_argument('--seq_len', type=int, required=True)
