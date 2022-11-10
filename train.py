@@ -99,6 +99,10 @@ def run_iteration(model, loader, args, training=True, message = ''):
     elem_num = 0
     steps = 0
     target_device = 'cuda:{}'.format(args.local_rank)
+    
+    #if training == False:
+    #  early_stopping = EarlyStopping(verbose=True) #7 as default <- Validation Early-stop
+    
     for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(loader):
         if not args.deepspeed:
             model.optim.zero_grad()
@@ -132,6 +136,14 @@ def run_iteration(model, loader, args, training=True, message = ''):
             else:
                 loss.backward()
                 model.optim.step()
+                
+        #if training == False: #validation early-stop
+        #    early_stopping(loss, model, "./")
+        #    print("HELLO WORLD")
+        #    if early_stopping.early_stop:
+        #        print("Early stopping")
+        #        break        
+        
     return preds, trues
 
 
