@@ -62,6 +62,9 @@ class Config:
         elif self.prediction_type == 'multi':
             sys.argv.extend(["--features", 'M'])
             sys.argv.extend(["--input_len", '7', "--output_len", "7"])
+        elif self.prediction_type == 'multiuni':
+            sys.argv.extend(["--features", 'MS'])
+            sys.argv.extend(["--input_len", '7', "--output_len", "1"])
 
         else:
             raise NotImplemented
