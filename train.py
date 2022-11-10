@@ -216,35 +216,133 @@ def preform_experiment(args):
     print(len(v_preds[0])) #32 batch_size
     
     
-    #Get prediction values
+        #Get prediction values
     featurepred1 = []
+    featurepred2 = []
+    featurepred3 = []
+    #featurepred4 = []
+    #featurepred5 = []
+    #featurepred6 = []
+    #featurepred7 = []
     for feature in v_preds[0][0]:
       featurepred1.append(feature[0])
-    print("prediction" + str(featurepred1))
+      featurepred2.append(feature[1])
+      featurepred3.append(feature[2])
+      #featurepred4.append(feature[3])
+      #featurepred5.append(feature[4])
+      #featurepred6.append(feature[5])
+      #featurepred7.append(feature[6])
+    #print("prediction" + str(featurepred1))
 
     #Get truth values
     featuretrue1 = []
+    featuretrue2 = []
+    featuretrue3 = []
+    #featuretrue4 = []
+    #featuretrue5 = []
+    #featuretrue6 = []
+    #featuretrue7 = []
     for feature in v_trues[0][0]:
       featuretrue1.append(feature[0])
-    print("truth" + str(featuretrue1))
+      featuretrue2.append(feature[1])
+      featuretrue3.append(feature[2])
+      #featuretrue4.append(feature[3])
+      #featuretrue5.append(feature[4])
+      #featuretrue6.append(feature[5])
+      #featuretrue7.append(feature[6])
+    #print("truth" + str(featuretrue1))
 
     #Plot values       
     x = [1, 2, 3, 4, 5, 6,7,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25]
+   
     y = featurepred1 
     z = featuretrue1
+   
+    a = featurepred2 
+    b = featuretrue2
 
-    #Plot a simple line chart
+    c = featurepred3 
+    d = featuretrue3
+
+    #e = featurepred4
+    #f = featuretrue4
+
+    #g = featurepred5 
+    #h = featuretrue5
+
+    #i = featurepred6 
+    #j = featuretrue6
+
+    #k = featurepred7 
+    #l = featuretrue7
+
+    #Plot Feature 1
     plt.plot(x, y, label='Prediction')
-
-    #Plot another line on the same chart/graph
     plt.plot(x, z, label='Truth')
 
+    #Plot Feature 2
+    #plt.plot(x, a, label='P_F2')
+    #plt.plot(x, b, label='T_F2')
+
+    #Plot Feature 3
+    #plt.plot(x, c, label='P_F3')
+    #plt.plot(x, d, label='T_F3')
+
+    #Plot Feature 3
+    #plt.plot(x, e, label='P_F4')
+    #plt.plot(x, f, label='T_F4')
+
+    #Plot Feature 3
+    #plt.plot(x, g, label='P_F5')
+    #plt.plot(x, h, label='T_F5')
+
+    #Plot Feature 3
+    #plt.plot(x, i, label='P_F6')
+    #plt.plot(x, j, label='T_F6')
+
+    #Plot Feature 3
+    #plt.plot(x, k, label='P_F7')
+    #plt.plot(x, l, label='T_F7')
+
     #Map titles, label and legends
-    plt.title('Prediction vs. Truth value')
-    plt.xlabel('Time')
-    plt.ylabel('Value')
+    plt.title('NP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
     plt.legend()
-    plt.savefig('my_plot.png')
+    plt.savefig('NP15.png')
+    plt.close()
+
+    plt.plot(x, a, label='Prediction')
+    plt.plot(x, b, label='Truth')
+
+    plt.title('SP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('SP15.png')
+    plt.close()
+
+    plt.plot(x, c, label='Prediction')
+    plt.plot(x, d, label='Truth')
+
+    plt.title('ZP26')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('ZP26.png')
+    plt.close()
+
+
+
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
+    axes[0].plot(x, y)
+    axes[0].plot(x, z)
+    axes[1].plot(x, a)
+    axes[1].plot(x, b)
+    axes[2].plot(x, c)
+    axes[2].plot(x, d)
+    fig.tight_layout()
+    plt.savefig('predictions.png')
     plt.close()
 
 def main():
