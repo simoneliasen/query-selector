@@ -19,6 +19,8 @@ from metrics import metric
 
 import matplotlib.pyplot as plt
 
+from utils.tools import EarlyStopping
+
 
 def get_model(args):
     return Transformer(args.embedding_size, args.hidden_size, args.input_len, args.dec_seq_len, args.pred_len,
@@ -134,6 +136,8 @@ def run_iteration(model, loader, args, training=True, message = ''):
 
 
 def preform_experiment(args):
+    
+    early_stopping = EarlyStopping(verbose=True) #7 as default
 
     model = get_model(args)
     params = list(get_params(model))
@@ -163,6 +167,10 @@ def preform_experiment(args):
         if args.local_rank == 0:
             ipc.sendPartials(iter, mse, mae)
         print("Time per iteration {}, memory {}".format((time.time() - start)/iter, torch.cuda.memory_stats()))
+        early_stopping(mse, model, "./")
+        if early_stopping.early_stop:
+                print("Early stopping")
+                break
 
     print(torch.cuda.max_memory_allocated())
 
