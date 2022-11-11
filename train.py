@@ -245,7 +245,7 @@ def run_iteration(model, loader, args, training=True, message = ''):
 
 
 def preform_experiment(args):
-    #early_stopping = EarlyStopping(verbose=True) #7 as default
+    early_stopping = EarlyStopping(patience=3, verbose=True) #7 as default, set to 3 for testing
 
     model = get_model(args)
     params = list(get_params(model))
@@ -281,6 +281,10 @@ def preform_experiment(args):
           val_mse, val_mae = validate(args, model, deepspeed_engine)
           val_mses.append(val_mse)
           val_maes.append(val_mae)
+          early_stopping(val_mae, model, "./")
+          if early_stopping.early_stop:
+            print("Early stopping")
+            break
           
         #early_stopping(mse, model, "./")
         #if early_stopping.early_stop:
