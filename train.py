@@ -261,7 +261,7 @@ def run_iteration(model, loader, args, training=True, message = ''):
 
 
 def preform_experiment(args):
-    early_stopping = EarlyStopping(patience=3, verbose=True) #7 as default, set to 3 for testing
+    early_stopping = EarlyStopping(patience=10, verbose=True) #7 as default, set to 3 for testing
 
     model = get_model(args)
     params = list(get_params(model))
@@ -293,7 +293,7 @@ def preform_experiment(args):
         train_mses.append(train_mse)
         train_maes.append(train_mae)
         
-        if iter % 2:
+        if iter % 5:
           val_mse, val_mae = validate(args, model, deepspeed_engine)
           val_mses.append(val_mse)
           val_maes.append(val_mae)
