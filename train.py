@@ -32,10 +32,9 @@ def get_params(mdl):
 
 
 def _get_data(args, flag):
-    if not args.data == 'ETTm1':
-        Data = Dataset_ETT_hour
-    else:
-        Data = Dataset_ETT_minute
+    #Not only applicable for ETT
+    Data = Dataset_ETT_hour
+
 
     if flag == 'test':
         shuffle_flag = False;
