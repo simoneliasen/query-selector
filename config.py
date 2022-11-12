@@ -76,14 +76,12 @@ class Config:
         res += ':::: train prediction sequence len: {}\n'.format(self.pred_len)
         res += ':::: train decoder sequence len: {}\n'.format(self.dec_seq_len)
         res += ':::: train batch size: {}\n'.format(self.batch_size)
-        res += ':::: train prediction type: {}\n'.format('univariate' if self.prediction_type == 'uni'
-                                                         else 'multiunivariate')
+        res += ':::: train prediction type: {}\n'.format('univariate' if self.prediction_type == 'uni' else 'multiunivariate')
         res += ':::: train iterations: {}\n'.format(str(self.iterations))
         res += ':::: train experiment number: {}\n'.format(self.exps)
         res += ':::: train using deepspeed: {}\n'.format(self.deepspeed)
         res += ':::: train using fp16: {}\n'.format(self.deepspeed)
         res += ':::: train recording: {}\n'.format(self.debug)
-
         res += ':::: model hidden size: {}\n'.format(self.hidden_size)
         res += ':::: model embedding size: {}\n'.format(self.embedding_size)
         res += ':::: model encoder layers: {}\n'.format(self.n_encoder_layers)
@@ -108,7 +106,7 @@ class Config:
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, choices=['ETTh1', 'small_new', 'new', 'ETTh2', 'ETTm1'], required=True)
+    parser.add_argument('--data', type=str, choices=['ETTh1', 'dataset_dropNA_subset', 'dataset_dropNA'], required=True)
     parser.add_argument('--input_len', type=int, required=True)
     parser.add_argument('--output_len', type=int, required=True)
     parser.add_argument('--seq_len', type=int, required=True)
@@ -118,7 +116,6 @@ def build_parser():
     parser.add_argument('--target', default='OT', type=str)
     parser.add_argument('--iterations', type=int, required=True)
     parser.add_argument('--exps', type=int, required=True)
-
     parser.add_argument('--hidden_size', type=int, required=True)
     parser.add_argument('--n_heads', type=int, required=True)
     parser.add_argument('--n_encoder_layers', type=int, required=True)
@@ -129,14 +126,9 @@ def build_parser():
     parser.add_argument('--embedding_size', type=int, required=True)
     parser.add_argument('--dropout', type=float, required=True)
     parser.add_argument('--fp16', action='store_true')
-
     parser.add_argument('--inverse', action='store_true', help='inverse output data', default=False)
-    parser.add_argument('--num-workers',
-                        type=int,
-                        default=2)
-    parser.add_argument('--freq', type=str, default='h',
-                        help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
-
+    parser.add_argument('--num-workers', type=int, default=2)
+    parser.add_argument('--freq', type=str, default='h', help='freq for time features encoding, options:[s:secondly, t:minutely, h:hourly, d:daily, b:business days, w:weekly, m:monthly], you can also use more detailed freq like 15min or 3h')
     parser.add_argument("--local_rank", type=int, default=0)
     parser.add_argument("--run_num", type=int, default=0)
     parser.add_argument('--debug', action='store_true')
