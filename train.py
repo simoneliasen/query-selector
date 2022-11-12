@@ -145,7 +145,7 @@ def validate(args, model, deepspeed_engine):
   plt.xlabel('Hour')
   plt.ylabel('Price')
   plt.legend()
-  plt.savefig('NP15.png')
+  plt.savefig('images/NP15.png')
   plt.close()
 
   plt.plot(a, label='Prediction')
@@ -155,7 +155,7 @@ def validate(args, model, deepspeed_engine):
   plt.xlabel('Hour')
   plt.ylabel('Price')
   plt.legend()
-  plt.savefig('SP15.png')
+  plt.savefig('images/SP15.png')
   plt.close()
 
   plt.plot(c, label='Prediction')
@@ -165,7 +165,7 @@ def validate(args, model, deepspeed_engine):
   plt.xlabel('Hour')
   plt.ylabel('Price')
   plt.legend()
-  plt.savefig('ZP26.png')
+  plt.savefig('images/ZP26.png')
   plt.close()
 
   fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
@@ -176,7 +176,7 @@ def validate(args, model, deepspeed_engine):
   axes[2].plot(c)
   axes[2].plot(d)
   fig.tight_layout()
-  plt.savefig('predictions.png')
+  plt.savefig('images/predictions.png')
   plt.close()
 
   #Set back to training (does not handle model.inference)
@@ -192,9 +192,6 @@ def run_iteration(model, loader, args, training=True, message = ''):
     elem_num = 0
     steps = 0
     target_device = 'cuda:{}'.format(args.local_rank)
-    
-    #if training == False:
-    #  early_stopping = EarlyStopping(verbose=True) #7 as default <- Validation Early-stop
     
     for i, (batch_x, batch_y, batch_x_mark, batch_y_mark) in enumerate(loader):
         if not args.deepspeed:
@@ -228,19 +225,7 @@ def run_iteration(model, loader, args, training=True, message = ''):
             else:
                 loss.backward()
                 model.optim.step()
-                
-        #if training == False: #validation early-stop
-        #    early_stopping(loss, model, "./")
-        #    if early_stopping.early_stop:
-        #        print("Early stopping")
-        #        break        
-        
-    
-    #if training == False: #validation early-stop
-        #    early_stopping(loss, model, "./")
-        #    if early_stopping.early_stop:
-        #        print("Early stopping")
-        #        break 
+
     return preds, trues
 
 
@@ -286,11 +271,6 @@ def preform_experiment(args):
             print("Early stopping")
             break
           
-        #early_stopping(mse, model, "./")
-        #if early_stopping.early_stop:
-        #        print("Early stopping")
-        #        break
-
     plt.plot(train_mses, label='train_mse')
     plt.plot(train_maes, label='train_mae')
 
@@ -298,7 +278,7 @@ def preform_experiment(args):
     plt.xlabel('time')
     plt.ylabel('loss')
     plt.legend()
-    plt.savefig('train-mse-and-mae.png')
+    plt.savefig('images/train-mse-and-mae.png')
     plt.close()
 
     plt.plot(val_mses, label='val_mse')
@@ -308,7 +288,7 @@ def preform_experiment(args):
     plt.xlabel('time')
     plt.ylabel('loss')
     plt.legend()
-    plt.savefig('val-mse-and-mae.png')
+    plt.savefig('images/val-mse-and-mae.png')
     plt.close()
 
     print(torch.cuda.max_memory_allocated())
