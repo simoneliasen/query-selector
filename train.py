@@ -116,6 +116,25 @@ def run_metrics(caption, preds, trues):
     return mse, mae
 
 
+def test(args, model, deepspeed_engine):
+  best_model_path = 'checkpoints/checkpoint.pth'
+  model.load_state_dict(torch.load(best_model_path)) 
+
+  test_data, test_loader = _get_data(args, flag='test')
+
+  if deepspeed:
+      model.inference()
+  else:
+      model.eval()
+
+  v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
+  mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
+
+  model.train()
+
+  return mse, mae 
+
+
 def validate(args, model, deepspeed_engine):
   if args.debug:
       model.record()
