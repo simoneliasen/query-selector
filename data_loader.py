@@ -14,8 +14,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 class Dataset_ETT_hour(Dataset):
-    def __init__(self, root_path, flag='train', size=None, 
-                 features='S', data_path='ETTh1.csv', 
+    def __init__(self, root_path, flag='train', size=None,
+                 features='S', data_path='ETTh1.csv',
                  target='OT', scale=True, inverse=False, timeenc=0, freq='h'):
         # size [seq_len, label_len, pred_len]
         # info
@@ -45,8 +45,7 @@ class Dataset_ETT_hour(Dataset):
 
     def __read_data__(self):
         self.scaler = StandardScaler()
-        df_raw = pd.read_csv(os.path.join(self.root_path,
-                                          self.data_path))
+        df_raw = pd.read_csv(os.path.join(self.root_path, self.data_path))
 
         border1s = [0, 12*30*24 - self.seq_len, 12*30*24+4*30*24 - self.seq_len]
         border2s = [12*30*24, 12*30*24+4*30*24, 12*30*24+8*30*24]
@@ -55,6 +54,7 @@ class Dataset_ETT_hour(Dataset):
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
+            target_index = list(cols_data).index(self.target)
             df_data = df_raw[cols_data]
         elif self.features=='S':
             df_data = df_raw[[self.target]]
@@ -75,6 +75,9 @@ class Dataset_ETT_hour(Dataset):
             self.data_y = df_data.values[border1:border2]
         else:
             self.data_y = data[border1:border2]
+            if self.features == "MS":
+              self.data_y = self.data_y[:, [target_index]]
+            
         self.data_stamp = data_stamp
     
     def __getitem__(self, index):
@@ -127,8 +130,7 @@ class Dataset_Pred(Dataset):
 
     def __read_data__(self):
         self.scaler = StandardScaler()
-        df_raw = pd.read_csv(os.path.join(self.root_path,
-                                          self.data_path))
+        df_raw = pd.read_csv(os.path.join(self.root_path, self.data_path))
         '''
         df_raw.columns: ['date', ...(other features), target feature]
         '''
@@ -140,6 +142,7 @@ class Dataset_Pred(Dataset):
         
         if self.features=='M' or self.features=='MS':
             cols_data = df_raw.columns[1:]
+            target_index = list(cols_data).index(self.target)
             df_data = df_raw[cols_data]
         elif self.features=='S':
             df_data = df_raw[[self.target]]
@@ -161,6 +164,8 @@ class Dataset_Pred(Dataset):
         self.data_x = data[border1:border2]
         if self.inverse:
             self.data_y = df_data.values[border1:border2]
+            if self.features == "MS":
+              self.data_y = self.data_y[:, [target_index]]
         else:
             self.data_y = data[border1:border2]
         self.data_stamp = data_stamp

@@ -59,13 +59,13 @@ class Config:
         if self.prediction_type == 'uni':
             sys.argv.extend(["--features", 'S'])
             sys.argv.extend(["--input_len", '1', "--output_len", "1"])
-        elif self.prediction_type == 'multi':
-            sys.argv.extend(["--features", 'M'])
-            sys.argv.extend(["--input_len", '7', "--output_len", "7"])
         elif self.prediction_type == 'multiuni':
             sys.argv.extend(["--features", 'MS'])
             sys.argv.extend(["--input_len", '7', "--output_len", "1"])
-
+        elif self.prediction_type == 'multi':
+            sys.argv.extend(["--features", 'M'])
+            sys.argv.extend(["--input_len", '7', "--output_len", "7"])
+    
         else:
             raise NotImplemented
 
@@ -113,7 +113,7 @@ def build_parser():
     parser.add_argument('--dec_seq_len', type=int, required=True)
     parser.add_argument('--pred_len', type=int, required=True)
     parser.add_argument('--features', type=str, required=True)
-    parser.add_argument('--target', default='OT', type=str)
+    parser.add_argument('--target', default='TH_NP15_GEN-APND', type=str)
     parser.add_argument('--iterations', type=int, required=True)
     parser.add_argument('--exps', type=int, required=True)
     parser.add_argument('--hidden_size', type=int, required=True)
