@@ -126,7 +126,14 @@ class Dataset_NoBorders(Dataset):
         self.freq = freq
 
         self.root_path = root_path
-        self.data_path = data_path
+
+        if flag == 'train':
+            self.data_path = 'training.csv'
+        elif flag == 'test':
+            self.data_path = 'validation.csv'
+        else:
+          print("issue med csv init")
+
         self.__read_data__()
 
     def __read_data__(self):
