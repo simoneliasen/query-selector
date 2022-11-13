@@ -1,23 +1,19 @@
 import multiprocessing
 from datetime import datetime
 from multiprocessing import Process
-
 from deepspeed.launcher import runner as ds_runer
 from torch.distributed import launch as pt_runner
 from config import Config
 import sys
 import socket
-
 from ipc import resultServer
 
-conf = Config.from_file('settings/tuned/ts_query-selector_m_h1_24.json')
-
+conf = Config.from_file('settings/custom_settings.json')
 print(conf.to_json())
 
 q = multiprocessing.Queue()
 p = Process(target=resultServer, args=[conf, q])
 p.start()
-
 
 if conf.deepspeed:
     sys.argv.extend(['train.py', '--deepspeed_config', 'settings/ds_config_zero.json'])
