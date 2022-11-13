@@ -311,7 +311,7 @@ def preform_experiment(args):
         train_mses.append(train_mse)
         train_maes.append(train_mae)
         
-        if iter % 5:
+        if iter % 5 == 0:
           val_mse, val_mae = validate(args, model, deepspeed_engine)
           val_mses.append(val_mse)
           val_maes.append(val_mae)
