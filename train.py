@@ -1,22 +1,17 @@
 
 import time
-
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
-
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-
 import deepspeed
 import torch.nn as nn
 
 from config import build_parser
 from model import Transformer
 from data_loader import Dataset_ETT_hour
-
-import matplotlib.pyplot as plt
-
-from utils.tools import EarlyStopping
+from utils.tools import metric, EarlyStopping, visualize_loss, visualize_predictions
 
 
 def get_model(args):
@@ -26,15 +21,12 @@ def get_model(args):
                        n_decoder_layers=args.n_decoder_layers, enc_attn_type=args.encoder_attention,
                        dec_attn_type=args.decoder_attention, dropout=args.dropout)
 
-
 def get_params(mdl):
     return mdl.parameters()
-
 
 def _get_data(args, flag):
     #Not only applicable for ETT
     Data = Dataset_ETT_hour
-
 
     if flag == 'test':
         shuffle_flag = False;
@@ -72,38 +64,6 @@ def _get_data(args, flag):
     return data_set, data_loader
 
 
-def RSE(pred, true):
-    return np.sqrt(np.sum((true-pred)**2)) / np.sqrt(np.sum((true-true.mean())**2))
-
-def CORR(pred, true):
-    u = ((true-true.mean(0))*(pred-pred.mean(0))).sum(0) 
-    d = np.sqrt(((true-true.mean(0))**2*(pred-pred.mean(0))**2).sum(0))
-    return (u/d).mean(-1)
-
-def MAE(pred, true):
-    return np.mean(np.abs(pred-true))
-
-def MSE(pred, true):
-    return np.mean((pred-true)**2)
-
-def RMSE(pred, true):
-    return np.sqrt(MSE(pred, true))
-
-def MAPE(pred, true):
-    return np.mean(np.abs((pred - true) / true))
-
-def MSPE(pred, true):
-    return np.mean(np.square((pred - true) / true))
-
-def metric(pred, true):
-    mae = MAE(pred, true)
-    mse = MSE(pred, true)
-    rmse = RMSE(pred, true)
-    mape = MAPE(pred, true)
-    mspe = MSPE(pred, true)
-    
-    return mae,mse,rmse,mape,mspe
-
 def run_metrics(caption, preds, trues):
     preds = np.array(preds)
     trues = np.array(trues)
@@ -114,111 +74,6 @@ def run_metrics(caption, preds, trues):
     mae, mse, rmse, mape, mspe = metric(preds, trues)
     print('{} ; MSE: {}, MAE: {}'.format(caption, mse, mae))
     return mse, mae
-
-
-def visualize_predictions(v_preds, v_trues):
-    #Validation content
-    print("Feature count below")
-    print(len(v_preds[0][0][0])) #7 features
-    print("Timestep count below")
-    print(len(v_preds[0][0])) #24 timesteps
-    print("Batch_size below")
-    print(len(v_preds[0])) #32 batch_size
-
-    #Get prediction values
-    featurepred1 = []
-    featurepred2 = []
-    featurepred3 = []
-
-    for feature in v_preds[0][0]:
-        
-        featurepred1.append(feature[0])
-        featurepred2.append(feature[1])
-        featurepred3.append(feature[2])
-
-    #Get truth values
-    featuretrue1 = []
-    featuretrue2 = []
-    featuretrue3 = []
-
-    for feature in v_trues[0][0]:
-        featuretrue1.append(feature[0])
-        featuretrue2.append(feature[1])
-        featuretrue3.append(feature[2])
-
-    #Map features to variables and graphs
-    y = featurepred1 
-    z = featuretrue1
-
-    a = featurepred2 
-    b = featuretrue2
-
-    c = featurepred3 
-    d = featuretrue3
-
-    plt.plot(y, label='Prediction')
-    plt.plot(z, label='Truth')
-
-    plt.title('NP15')
-    plt.xlabel('Hour')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.savefig('images/NP15.png')
-    plt.close()
-
-    plt.plot(a, label='Prediction')
-    plt.plot(b, label='Truth')
-
-    plt.title('SP15')
-    plt.xlabel('Hour')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.savefig('images/SP15.png')
-    plt.close()
-
-    plt.plot(c, label='Prediction')
-    plt.plot(d, label='Truth')
-
-    plt.title('ZP26')
-    plt.xlabel('Hour')
-    plt.ylabel('Price')
-    plt.legend()
-    plt.savefig('images/ZP26.png')
-    plt.close()
-
-    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
-    axes[0].plot(y)
-    axes[0].plot(z)
-    axes[1].plot(a)
-    axes[1].plot(b)
-    axes[2].plot(c)
-    axes[2].plot(d)
-    fig.tight_layout()
-    plt.savefig('images/predictions.png')
-    plt.close()
-
-
-def visualize_loss(train_mses, train_maes, val_mses, val_maes):
-    plt.plot(train_mses, label='train_mse')
-    plt.plot(train_maes, label='train_mae')
-
-    plt.title('training mse and mae')
-    plt.xlabel('time')
-    plt.ylabel('loss')
-    plt.legend()
-    plt.savefig('images/train-mse-and-mae.png')
-    plt.close()
-
-    plt.plot(val_mses, label='val_mse')
-    plt.plot(val_maes, label='val_mae')
-
-    plt.title('validation mse and mae')
-    plt.xlabel('time')
-    plt.ylabel('loss')
-    plt.legend()
-    plt.savefig('images/val-mse-and-mae.png')
-    plt.close()
-
 
 
 #Only current differenee to validate() is loading of checkpoint
@@ -245,7 +100,6 @@ def test(args, model, deepspeed_engine):
     model.train()
 
     return mse, mae 
-
 
 
 def validate(args, model, deepspeed_engine):
@@ -369,5 +223,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-

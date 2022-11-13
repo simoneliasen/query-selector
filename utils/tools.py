@@ -1,6 +1,8 @@
 # Original code from https://github.com/zhouhaoyi/Informer2020/
+import matplotlib.pyplot as plt
 import numpy as np
 import torch
+
 
 def adjust_learning_rate(optimizer, epoch, args):
     # lr = args.learning_rate * (0.2 ** (epoch // 2))
@@ -16,6 +18,7 @@ def adjust_learning_rate(optimizer, epoch, args):
         for param_group in optimizer.param_groups:
             param_group['lr'] = lr
         print('Updating learning rate to {}'.format(lr))
+
 
 class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0):
@@ -48,11 +51,13 @@ class EarlyStopping:
         torch.save(model.state_dict(), path+'/checkpoints/'+'checkpoint.pth')
         self.val_loss_min = val_loss
 
+
 class dotdict(dict):
     """dot.notation access to dictionary attributes"""
     __getattr__ = dict.get
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
+
 
 class StandardScaler():
     def __init__(self):
@@ -72,3 +77,139 @@ class StandardScaler():
         mean = torch.from_numpy(self.mean).type_as(data).to(data.device) if torch.is_tensor(data) else self.mean
         std = torch.from_numpy(self.std).type_as(data).to(data.device) if torch.is_tensor(data) else self.std
         return (data * std) + mean
+
+
+def RSE(pred, true):
+    return np.sqrt(np.sum((true-pred)**2)) / np.sqrt(np.sum((true-true.mean())**2))
+
+def CORR(pred, true):
+    u = ((true-true.mean(0))*(pred-pred.mean(0))).sum(0) 
+    d = np.sqrt(((true-true.mean(0))**2*(pred-pred.mean(0))**2).sum(0))
+    return (u/d).mean(-1)
+
+def MAE(pred, true):
+    return np.mean(np.abs(pred-true))
+
+def MSE(pred, true):
+    return np.mean((pred-true)**2)
+
+def RMSE(pred, true):
+    return np.sqrt(MSE(pred, true))
+
+def MAPE(pred, true):
+    return np.mean(np.abs((pred - true) / true))
+
+def MSPE(pred, true):
+    return np.mean(np.square((pred - true) / true))
+
+def metric(pred, true):
+    mae = MAE(pred, true)
+    mse = MSE(pred, true)
+    rmse = RMSE(pred, true)
+    mape = MAPE(pred, true)
+    mspe = MSPE(pred, true)
+    
+    return mae,mse,rmse,mape,mspe
+
+
+def visualize_predictions(v_preds, v_trues):
+    #Validation content
+    print("Feature count below")
+    print(len(v_preds[0][0][0])) #7 features
+    print("Timestep count below")
+    print(len(v_preds[0][0])) #24 timesteps
+    print("Batch_size below")
+    print(len(v_preds[0])) #32 batch_size
+
+    #Get prediction values
+    featurepred1 = []
+    featurepred2 = []
+    featurepred3 = []
+
+    for feature in v_preds[0][0]:
+        featurepred1.append(feature[0])
+        featurepred2.append(feature[1])
+        featurepred3.append(feature[2])
+
+    #Get truth values
+    featuretrue1 = []
+    featuretrue2 = []
+    featuretrue3 = []
+
+    for feature in v_trues[0][0]:
+        featuretrue1.append(feature[0])
+        featuretrue2.append(feature[1])
+        featuretrue3.append(feature[2])
+
+    #Map features to variables and graphs
+    y = featurepred1 
+    z = featuretrue1
+
+    a = featurepred2 
+    b = featuretrue2
+
+    c = featurepred3 
+    d = featuretrue3
+
+    plt.plot(y, label='Prediction')
+    plt.plot(z, label='Truth')
+
+    plt.title('NP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/NP15.png')
+    plt.close()
+
+    plt.plot(a, label='Prediction')
+    plt.plot(b, label='Truth')
+
+    plt.title('SP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/SP15.png')
+    plt.close()
+
+    plt.plot(c, label='Prediction')
+    plt.plot(d, label='Truth')
+
+    plt.title('ZP26')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/ZP26.png')
+    plt.close()
+
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
+    axes[0].plot(y)
+    axes[0].plot(z)
+    axes[1].plot(a)
+    axes[1].plot(b)
+    axes[2].plot(c)
+    axes[2].plot(d)
+    fig.tight_layout()
+    plt.savefig('images/predictions.png')
+    plt.close()
+
+
+def visualize_loss(train_mses, train_maes, val_mses, val_maes):
+    plt.plot(train_mses, label='train_mse')
+    plt.plot(train_maes, label='train_mae')
+
+    plt.title('training mse and mae')
+    plt.xlabel('time')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.savefig('images/train-mse-and-mae.png')
+    plt.close()
+
+    plt.plot(val_mses, label='val_mse')
+    plt.plot(val_maes, label='val_mae')
+
+    plt.title('validation mse and mae')
+    plt.xlabel('time')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.savefig('images/val-mse-and-mae.png')
+    plt.close()

@@ -53,7 +53,6 @@ class InferenceModule(torch.nn.Module):
                 mod.inference()
 
 
-
 class InferenceModuleList(torch.nn.ModuleList):
     def inference(self):
         for mod in self.modules():
