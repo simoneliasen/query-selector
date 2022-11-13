@@ -116,122 +116,159 @@ def run_metrics(caption, preds, trues):
     return mse, mae
 
 
+def visualize_predictions(v_preds, v_trues):
+    #Validation content
+    print("Feature count below")
+    print(len(v_preds[0][0][0])) #7 features
+    print("Timestep count below")
+    print(len(v_preds[0][0])) #24 timesteps
+    print("Batch_size below")
+    print(len(v_preds[0])) #32 batch_size
+
+    #Get prediction values
+    featurepred1 = []
+    featurepred2 = []
+    featurepred3 = []
+
+    for feature in v_preds[0][0]:
+        
+        featurepred1.append(feature[0])
+        featurepred2.append(feature[1])
+        featurepred3.append(feature[2])
+
+    #Get truth values
+    featuretrue1 = []
+    featuretrue2 = []
+    featuretrue3 = []
+
+    for feature in v_trues[0][0]:
+        featuretrue1.append(feature[0])
+        featuretrue2.append(feature[1])
+        featuretrue3.append(feature[2])
+
+    #Map features to variables and graphs
+    y = featurepred1 
+    z = featuretrue1
+
+    a = featurepred2 
+    b = featuretrue2
+
+    c = featurepred3 
+    d = featuretrue3
+
+    plt.plot(y, label='Prediction')
+    plt.plot(z, label='Truth')
+
+    plt.title('NP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/NP15.png')
+    plt.close()
+
+    plt.plot(a, label='Prediction')
+    plt.plot(b, label='Truth')
+
+    plt.title('SP15')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/SP15.png')
+    plt.close()
+
+    plt.plot(c, label='Prediction')
+    plt.plot(d, label='Truth')
+
+    plt.title('ZP26')
+    plt.xlabel('Hour')
+    plt.ylabel('Price')
+    plt.legend()
+    plt.savefig('images/ZP26.png')
+    plt.close()
+
+    fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
+    axes[0].plot(y)
+    axes[0].plot(z)
+    axes[1].plot(a)
+    axes[1].plot(b)
+    axes[2].plot(c)
+    axes[2].plot(d)
+    fig.tight_layout()
+    plt.savefig('images/predictions.png')
+    plt.close()
+
+
+def visualize_loss(train_mses, train_maes, val_mses, val_maes):
+    plt.plot(train_mses, label='train_mse')
+    plt.plot(train_maes, label='train_mae')
+
+    plt.title('training mse and mae')
+    plt.xlabel('time')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.savefig('images/train-mse-and-mae.png')
+    plt.close()
+
+    plt.plot(val_mses, label='val_mse')
+    plt.plot(val_maes, label='val_mae')
+
+    plt.title('validation mse and mae')
+    plt.xlabel('time')
+    plt.ylabel('loss')
+    plt.legend()
+    plt.savefig('images/val-mse-and-mae.png')
+    plt.close()
+
+
+
+#Only current differenee to validate() is loading of checkpoint
 def test(args, model, deepspeed_engine):
-  best_model_path = 'checkpoints/checkpoint.pth'
-  model.load_state_dict(torch.load(best_model_path)) 
+    best_model_path = 'checkpoints/checkpoint.pth'
+    model.load_state_dict(torch.load(best_model_path)) 
 
-  test_data, test_loader = _get_data(args, flag='test')
+    if args.debug:
+        model.record()
 
-  if deepspeed:
-      model.inference()
-  else:
-      model.eval()
+    test_data, test_loader = _get_data(args, flag='test')
 
-  v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
-  mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
+    if deepspeed:
+        model.inference()
+    else:
+        model.eval()
 
-  model.train()
+    v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
+    mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
 
-  return mse, mae 
+    visualize_predictions(v_preds,v_trues)
+
+    #Set back to training (does not handle model.inference)
+    model.train()
+
+    return mse, mae 
+
 
 
 def validate(args, model, deepspeed_engine):
-  if args.debug:
-      model.record()
+    
+    if args.debug:
+        model.record()
 
-  test_data, test_loader = _get_data(args, flag='test')
+    test_data, test_loader = _get_data(args, flag='test')
 
-  if deepspeed:
-      model.inference()
-  else:
-      model.eval()
+    if deepspeed:
+        model.inference()
+    else:
+        model.eval()
 
-  v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
-  mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
+    v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
+    mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
 
-  #Validation content
-  print("Feature count below")
-  print(len(v_preds[0][0][0])) #7 features
-  print("Timestep count below")
-  print(len(v_preds[0][0])) #24 timesteps
-  print("Batch_size below")
-  print(len(v_preds[0])) #32 batch_size
-  
-  #Get prediction values
-  featurepred1 = []
-  featurepred2 = []
-  featurepred3 = []
+    visualize_predictions(v_preds,v_trues)
 
-  for feature in v_preds[0][0]:
-    featurepred1.append(feature[0])
-    featurepred2.append(feature[1])
-    featurepred3.append(feature[2])
+    #Set back to training (does not handle model.inference)
+    model.train()
 
-  #Get truth values
-  featuretrue1 = []
-  featuretrue2 = []
-  featuretrue3 = []
-
-  for feature in v_trues[0][0]:
-    featuretrue1.append(feature[0])
-    featuretrue2.append(feature[1])
-    featuretrue3.append(feature[2])
-
-  #Map features to variables and graphs
-  y = featurepred1 
-  z = featuretrue1
-
-  a = featurepred2 
-  b = featuretrue2
-
-  c = featurepred3 
-  d = featuretrue3
-
-  plt.plot(y, label='Prediction')
-  plt.plot(z, label='Truth')
-
-  plt.title('NP15')
-  plt.xlabel('Hour')
-  plt.ylabel('Price')
-  plt.legend()
-  plt.savefig('images/NP15.png')
-  plt.close()
-
-  plt.plot(a, label='Prediction')
-  plt.plot(b, label='Truth')
-
-  plt.title('SP15')
-  plt.xlabel('Hour')
-  plt.ylabel('Price')
-  plt.legend()
-  plt.savefig('images/SP15.png')
-  plt.close()
-
-  plt.plot(c, label='Prediction')
-  plt.plot(d, label='Truth')
-
-  plt.title('ZP26')
-  plt.xlabel('Hour')
-  plt.ylabel('Price')
-  plt.legend()
-  plt.savefig('images/ZP26.png')
-  plt.close()
-
-  fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
-  axes[0].plot(y)
-  axes[0].plot(z)
-  axes[1].plot(a)
-  axes[1].plot(b)
-  axes[2].plot(c)
-  axes[2].plot(d)
-  fig.tight_layout()
-  plt.savefig('images/predictions.png')
-  plt.close()
-
-  #Set back to training (does not handle model.inference)
-  model.train()
-
-  return mse, mae 
+    return mse, mae 
 
 
 def run_iteration(model, loader, args, training=True, message = ''):
@@ -320,25 +357,7 @@ def preform_experiment(args):
             print("Early stopping")
             break
           
-    plt.plot(train_mses, label='train_mse')
-    plt.plot(train_maes, label='train_mae')
-
-    plt.title('training mse and mae')
-    plt.xlabel('time')
-    plt.ylabel('loss')
-    plt.legend()
-    plt.savefig('images/train-mse-and-mae.png')
-    plt.close()
-
-    plt.plot(val_mses, label='val_mse')
-    plt.plot(val_maes, label='val_mae')
-
-    plt.title('validation mse and mae')
-    plt.xlabel('time')
-    plt.ylabel('loss')
-    plt.legend()
-    plt.savefig('images/val-mse-and-mae.png')
-    plt.close()
+    visualize_loss(train_mses, train_maes, val_mses, val_maes)
 
     print(torch.cuda.max_memory_allocated())
 
