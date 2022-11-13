@@ -8,7 +8,7 @@ import sys
 import socket
 from ipc import resultServer
 
-conf = Config.from_file('settings/custom_settings.json')
+conf = Config.from_file('settings/hyperparameters.json')
 print(conf.to_json())
 
 q = multiprocessing.Queue()
@@ -16,7 +16,7 @@ p = Process(target=resultServer, args=[conf, q])
 p.start()
 
 if conf.deepspeed:
-    sys.argv.extend(['train.py', '--deepspeed_config', 'settings/ds_config_zero.json'])
+    sys.argv.extend(['train.py', '--deepspeed_config', 'settings/ds_config.json'])
     conf.extend_argv()
     setting_argv = sys.argv.copy()
     for run_num in range(conf.exps):
