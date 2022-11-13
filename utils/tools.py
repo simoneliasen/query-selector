@@ -126,7 +126,7 @@ def visualize_predictions(v_preds, v_trues):
     featurepred2 = []
     featurepred3 = []
 
-    if len(v_preds[0][0]) > 1:
+    if len(v_preds[0][0][0]) > 1:
       multiOutput = True
 
     for feature in v_preds[0][0]:
