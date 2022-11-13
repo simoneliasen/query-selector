@@ -126,14 +126,18 @@ def visualize_predictions(v_preds, v_trues):
     featurepred2 = []
     featurepred3 = []
 
-    if len(v_preds[0][0][0]) > 1:
-      multiOutput = True
+    multiOutput = False
+
+    if len(v_preds[0][0][0]) > 1 or len(v_trues[0][0][0]) > 1:
+        multiOutput = True
+    else: 
+        multiOutput = False
 
     for feature in v_preds[0][0]:
         featurepred1.append(feature[0])
         if multiOutput:
-          featurepred2.append(feature[1])
-          featurepred3.append(feature[2])
+            featurepred2.append(feature[1])
+            featurepred3.append(feature[2])
 
     #Get truth values
     featuretrue1 = []
@@ -143,18 +147,18 @@ def visualize_predictions(v_preds, v_trues):
     for feature in v_trues[0][0]:
         featuretrue1.append(feature[0])
         if multiOutput:
-          featuretrue2.append(feature[1])
-          featuretrue3.append(feature[2])
+            featuretrue2.append(feature[1])
+            featuretrue3.append(feature[2])
 
     #Map features to variables and graphs
     y = featurepred1 
     z = featuretrue1
 
     if multiOutput:
-      a = featurepred2 
-      b = featuretrue2
-      c = featurepred3 
-      d = featuretrue3
+        a = featurepred2 
+        b = featuretrue2
+        c = featurepred3 
+        d = featuretrue3
 
     plt.plot(y, label='Prediction')
     plt.plot(z, label='Truth')
@@ -167,36 +171,36 @@ def visualize_predictions(v_preds, v_trues):
     plt.close()
 
     if multiOutput:
-      plt.plot(a, label='Prediction')
-      plt.plot(b, label='Truth')
+        plt.plot(a, label='Prediction')
+        plt.plot(b, label='Truth')
 
-      plt.title('SP15')
-      plt.xlabel('Hour')
-      plt.ylabel('Price')
-      plt.legend()
-      plt.savefig('images/SP15.png')
-      plt.close()
+        plt.title('SP15')
+        plt.xlabel('Hour')
+        plt.ylabel('Price')
+        plt.legend()
+        plt.savefig('images/SP15.png')
+        plt.close()
 
-      plt.plot(c, label='Prediction')
-      plt.plot(d, label='Truth')
+        plt.plot(c, label='Prediction')
+        plt.plot(d, label='Truth')
 
-      plt.title('ZP26')
-      plt.xlabel('Hour')
-      plt.ylabel('Price')
-      plt.legend()
-      plt.savefig('images/ZP26.png')
-      plt.close()
+        plt.title('ZP26')
+        plt.xlabel('Hour')
+        plt.ylabel('Price')
+        plt.legend()
+        plt.savefig('images/ZP26.png')
+        plt.close()
 
-      fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
-      axes[0].plot(y)
-      axes[0].plot(z)
-      axes[1].plot(a)
-      axes[1].plot(b)
-      axes[2].plot(c)
-      axes[2].plot(d)
-      fig.tight_layout()
-      plt.savefig('images/predictions.png')
-      plt.close()
+        fig, axes = plt.subplots(nrows=1, ncols=3, figsize=(10, 5))
+        axes[0].plot(y)
+        axes[0].plot(z)
+        axes[1].plot(a)
+        axes[1].plot(b)
+        axes[2].plot(c)
+        axes[2].plot(d)
+        fig.tight_layout()
+        plt.savefig('images/predictions.png')
+        plt.close()
 
 
 def visualize_loss(train_mses, train_maes, val_mses, val_maes):
