@@ -106,7 +106,7 @@ class Config:
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--data', type=str, choices=['ETTh1', 'dataset_dropNA_subset', 'dataset_dropNA'], required=True)
+    parser.add_argument('--data', type=str, choices=['ETTh1', 'dataset_dropNA_subset', 'dataset_dropNA', 'training','validation'], required=True)
     parser.add_argument('--input_len', type=int, required=True)
     parser.add_argument('--output_len', type=int, required=True)
     parser.add_argument('--seq_len', type=int, required=True)
