@@ -136,11 +136,15 @@ def visualize_predictions(v_preds, v_trues):
     else: 
         multiOutput = False
 
+    #Load Std and mean to inverse transformation of scaling just for prediction
+    s = np.load('settings/std.npy')
+    m = np.load('settings/mean.npy')
+
     for feature in v_preds[0][0]:
-        featurepred1.append(feature[0])
+        featurepred1.append((feature[0]*s[0])+m[0])
         if multiOutput:
-            featurepred2.append(feature[1])
-            featurepred3.append(feature[2])
+            featurepred2.append((feature[1]*s[1])+m[1])
+            featurepred3.append((feature[2]*s[2])+m[2])
 
     #Get truth values
     featuretrue1 = []
@@ -148,10 +152,10 @@ def visualize_predictions(v_preds, v_trues):
     featuretrue3 = []
 
     for feature in v_trues[0][0]:
-        featuretrue1.append(feature[0])
+        featuretrue1.append((feature[0]*s[0])+m[0])
         if multiOutput:
-            featuretrue2.append(feature[1])
-            featuretrue3.append(feature[2])
+            featuretrue2.append((feature[1]*s[1])+m[1])
+            featuretrue3.append((feature[2]*s[2])+m[2])
 
     #Map features to variables and graphs
     y = featurepred1 
