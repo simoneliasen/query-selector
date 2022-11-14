@@ -3,7 +3,7 @@ from datetime import datetime
 from multiprocessing import Process
 from deepspeed.launcher import runner as ds_runer
 from torch.distributed import launch as pt_runner
-from config import Config
+from settings.config import Config
 import sys
 import socket
 from ipc import resultServer

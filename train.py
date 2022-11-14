@@ -8,9 +8,9 @@ from torch.utils.data import DataLoader
 import deepspeed
 import torch.nn as nn
 
-from config import build_parser
+from settings.config import build_parser
 from model import Transformer
-from data_loader import Dataset_ETT_hour
+from data.data_loader import Dataset_ETT_hour
 from utils.tools import metric, EarlyStopping, visualize_loss, visualize_predictions
 
 
