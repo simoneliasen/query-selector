@@ -76,7 +76,8 @@ class Dataset_ETT_hour(Dataset):
         else:
             self.data_y = data[border1:border2]
             if self.features == "MS":
-              self.data_y = self.data_y[:, [target_index]]
+              #self.data_y = self.data_y[:, [target_index]] #one ouput as target
+              self.data_y = self.data_y[:, 0:3] #three outputs (first three columns)
             
         self.data_stamp = data_stamp
     
@@ -164,8 +165,7 @@ class Dataset_NoBorders(Dataset):
         else:
             self.data_y = data[:]
             if self.features == "MS":
-              #self.data_y = self.data_y[:, [target_index]] #1 output (first one NP15)
-              self.data_y = self.data_y[:, 0:3] #3 first outputs modified
+              self.data_y = self.data_y[:, [target_index]]
             
         self.data_stamp = data_stamp
     
