@@ -164,7 +164,8 @@ class Dataset_NoBorders(Dataset):
         else:
             self.data_y = data[:]
             if self.features == "MS":
-              self.data_y = self.data_y[:, [target_index]]
+              #self.data_y = self.data_y[:, [target_index]] #1 output (first one NP15)
+              self.data_y = self.data_y[:, 0:3] #3 first outputs modified
             
         self.data_stamp = data_stamp
     

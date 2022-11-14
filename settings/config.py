@@ -61,10 +61,10 @@ class Config:
             sys.argv.extend(["--input_len", '1', "--output_len", "1"])
         elif self.prediction_type == 'multiuni':
             sys.argv.extend(["--features", 'MS'])
-            sys.argv.extend(["--input_len", '7', "--output_len", "1"])
+            sys.argv.extend(["--input_len", '372', "--output_len", "3"])
         elif self.prediction_type == 'multi':
             sys.argv.extend(["--features", 'M'])
-            sys.argv.extend(["--input_len", '7', "--output_len", "7"])
+            sys.argv.extend(["--input_len", '372', "--output_len", "372"])
     
         else:
             raise NotImplemented
