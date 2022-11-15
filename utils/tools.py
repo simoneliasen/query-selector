@@ -123,6 +123,8 @@ def visualize_predictions(v_preds, v_trues):
     print(len(v_preds[0][0])) #24 timesteps
     print("Batch_size below")
     print(len(v_preds[0])) #32 batch_size
+    print("Number of predictions")
+    print(len(v_preds)) #2842 validation steps
 
     #Get prediction values
     featurepred1 = []
