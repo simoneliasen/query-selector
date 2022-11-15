@@ -137,10 +137,10 @@ def test(args, model, deepspeed_engine):
 
 
 def run(args):
-    season = 0 #count what season 1-4
-    episodes = 0 #count what episode 1-7
+    season = 1 #count what season 1-4
+    episode = 1 #count what episode 1-7
 
-    early_stopping = EarlyStopping(patience=10, verbose=True)
+    early_stopping = EarlyStopping(patience=3, verbose=True)
 
     model = get_model(args)
     params = list(get_params(model))
@@ -173,32 +173,85 @@ def run(args):
         train_maes.append(train_mae)
         
         if iter % 3 == 0:
-            val_mse, val_mae, preds, trues   = test(args, model, deepspeed_engine)
+            val_mse, val_mae, preds, trues = test(args, model, deepspeed_engine)
             val_mses.append(val_mse)
             val_maes.append(val_mae)
             early_stopping(val_mae, model, "./")
             if early_stopping.early_stop: #stuff done each time early-stoppimg is hit (next set until done)
                 print("Early stopping")
-                print("season: " + str(season) + " episode: " + str(episode))
+                print("season: " + str(season) + " episode: " + str(episode) + " done")
                 visualize_predictions(preds, trues)       
                 visualize_loss(train_mses, train_maes, val_mses, val_maes)
-
-                goodshit = [train_mses, train_maes, val_mses, val_maes, preds, trues]
+                goodshit = [val_mses, val_maes, preds, trues]
                 goodest_shit.append(goodshit)
-
-                if episode == 7 and season == 4:
+              
+                if episode == 7 and season == 4: 
+                  print("JUST HIT EPISODE 7 AND SEASON 4")
                   break
-                elif episode == 7:
+                elif episode == 7: #reset model here
+                  early_stopping = EarlyStopping(patience=3, verbose=True)
+                  print("JUST RESETTED THE MODEL AND NEW TRAINING SET")
                   season += 1
-                  episode = 0
-                else:
+                  episode = 1
+                  
+                  if season == 1:
+                    args.data = 'training '+str(episode)+' 2021-01-10 23:00:00'
+                  elif season == 2:
+                    args.data = 'training '+str(episode)+' 2021-04-11 23:00:00'
+                  elif season == 3:
+                    args.data = 'training '+str(episode)+' 2021-07-11 23:00:00'
+                  elif season == 4:
+                    args.data = 'training '+str(episode)+' 2021-10-10 23:00:00'
+
+                  print("NEW TRAINING SET")
+                  print(args.data)
+
+                  train_data, train_loader = _get_data(args, flag='train')
+
+                  model = get_model(args)
+                  params = list(get_params(model))
+                  if args.deepspeed:
+                      deepspeed_engine, optimizer, _, _ = deepspeed.initialize(args=args, model=model, model_parameters=params)
+                  else:
+                      model.to('cuda')
+                      model.optim = Adam(params, lr=0.001)
+
+                else: #new training-set, not new model
+                  early_stopping = EarlyStopping(patience=3, verbose=True)
                   episode+=1
-            if episode == 7 and season == 4:
+
+                  if season == 1:
+                    args.data = 'training '+str(episode)+' 2021-01-10 23:00:00'
+                  elif season == 2:
+                    args.data = 'training '+str(episode)+' 2021-04-11 23:00:00'
+                  elif season == 3:
+                    args.data = 'training '+str(episode)+' 2021-07-11 23:00:00'
+                  elif season == 4:
+                    args.data = 'training '+str(episode)+' 2021-10-10 23:00:00'
+
+                  print("NEW TRAINING SET")
+                  print(args.data)
+                  train_data, train_loader = _get_data(args, flag='train')
+
+            if episode == 8 and season == 4: #+1 episode as episode +1 is inserted in end
+                  print("I thinking it fucking worked ma ggg")
+                  print("I thinking it fucking worked ma ggg")
+                  print("I thinking it fucking worked ma ggg")
+                  print("I thinking it fucking worked ma ggg")
                   break
                 
-    visualize_predictions(preds, trues)       
-    visualize_loss(train_mses, train_maes, val_mses, val_maes)
+    #visualize_predictions(preds, trues)       
+   # visualize_loss(train_mses, train_maes, val_mses, val_maes)
     print(torch.cuda.max_memory_allocated())
+
+    print("val_mses")
+    print(len(goodest_shit[0]))
+    print("val_maes")
+    print(len(goodest_shit[1]))
+    print("preds")
+    print(len(goodest_shit[2]))
+    print("trues")
+    print(len(goodest_shit[3]))
 
 
 def main():
