@@ -7,10 +7,9 @@ from torch.optim import Adam
 from torch.utils.data import DataLoader
 import deepspeed
 import torch.nn as nn
-
 from settings.config import build_parser
 from model import Transformer
-from data.data_loader import Dataset_ETT_hour, Dataset_NoBorders
+from data.data_loader import Dataset
 from utils.tools import metric, EarlyStopping, visualize_loss, visualize_predictions
 
 
@@ -25,18 +24,12 @@ def get_params(mdl):
     return mdl.parameters()
 
 def _get_data(args, flag):
-    #Not only applicable for ETT
-    Data = Dataset_ETT_hour
+    Data = Dataset
 
     if flag == 'test':
         shuffle_flag = False;
-        drop_last = True;
-        batch_size = 1
-        freq = args.freq
-    elif flag == 'pred':
-        shuffle_flag = False;
         drop_last = False;
-        batch_size = 1;
+        batch_size = 1
     else:
         shuffle_flag = True;
         drop_last = True;
@@ -76,53 +69,6 @@ def run_metrics(caption, preds, trues):
     return mse, mae
 
 
-#Only current differenee to validate() is loading of checkpoint
-def test(args, model, deepspeed_engine):
-    best_model_path = 'checkpoints/checkpoint.pth'
-    model.load_state_dict(torch.load(best_model_path)) 
-
-    Data = Dataset_NoBorders
-
-    shuffle_flag = False;
-    drop_last = True;
-    batch_size = 1
-    freq = args.freq
-
-    test_data = Data(
-        root_path='data',
-        data_path=args.data+'.csv',
-        flag='test',
-        size=[args.seq_len, 0, args.pred_len],
-        features=args.features,
-        target=args.target,
-        inverse=args.inverse,
-    )
-
-    print('test', len(test_data))
-
-    test_loader = DataLoader(
-        test_data,
-        batch_size=batch_size,
-        shuffle=shuffle_flag,
-        num_workers=args.num_workers,
-        drop_last=drop_last)
-
-    if deepspeed:
-        model.inference()
-    else:
-        model.eval()
-
-    v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
-    mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
-
-    visualize_predictions(v_preds,v_trues)
-
-    #Set back to training (does not handle model.inference)
-    model.train()
-
-    return mse, mae 
-
-
 def run_iteration(model, loader, args, training=True, message = ''):
     preds = []
     trues = []
@@ -145,7 +91,6 @@ def run_iteration(model, loader, args, training=True, message = ''):
 
         loss = nn.functional.mse_loss(result.squeeze(2), target.squeeze(2), reduction='mean')
 
-        #pred = result.detach().cpu().unsqueeze(2).numpy()  # .squeeze()
         pred = result.detach().cpu().numpy()  # .squeeze()
         true = target.detach().cpu().numpy()  # .squeeze()
 
@@ -167,8 +112,35 @@ def run_iteration(model, loader, args, training=True, message = ''):
     return preds, trues
 
 
-def preform_experiment(args):
-    early_stopping = EarlyStopping(patience=10, verbose=True) #7 as default, set to 3 for testing
+def test(args, model, deepspeed_engine):
+    #best_model_path = 'checkpoints/checkpoint.pth' #removed from now, does not have best_model starting out
+    #model.load_state_dict(torch.load(best_model_path)) 
+
+    if args.debug:
+        model.record()
+
+    test_data, test_loader = _get_data(args, flag='test')
+
+    if deepspeed:
+        model.inference()
+    else:
+        model.eval()
+
+    preds, trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
+    test_mse, test_mae = run_metrics("Loss after iteration {}".format(iter), preds, trues)
+
+    visualize_predictions(preds, trues)
+
+    model.train()
+
+    return test_mse, test_mae, preds, trues  
+
+
+def run(args):
+    season = 0 #count what season 1-4
+    episodes = 0 #count what episode 1-7
+
+    early_stopping = EarlyStopping(patience=10, verbose=True)
 
     model = get_model(args)
     params = list(get_params(model))
@@ -178,7 +150,7 @@ def preform_experiment(args):
     else:
         model.to('cuda')
         model.optim = Adam(params, lr=0.001)
-
+   
     train_data, train_loader = _get_data(args, flag='train')
 
     assert len(train_data.data_x[0]) == args.input_len, \
@@ -188,11 +160,11 @@ def preform_experiment(args):
             len(train_data.data_y[0]), args.output_len)
 
     start = time.time()
-
     train_mses = []
     train_maes = []
     val_mses = []
     val_maes = []
+    goodest_shit = []
 
     for iter in range(1, args.iterations + 1):
         preds, trues = run_iteration(deepspeed_engine if args.deepspeed else model , train_loader, args, training=True, message=' Run {:>3}, iteration: {:>3}:  '.format(args.run_num, iter))
@@ -201,23 +173,38 @@ def preform_experiment(args):
         train_maes.append(train_mae)
         
         if iter % 3 == 0:
-          val_mse, val_mae = validate(args, model, deepspeed_engine)
-          val_mses.append(val_mse)
-          val_maes.append(val_mae)
-          early_stopping(val_mae, model, "./")
-          if early_stopping.early_stop:
-            print("Early stopping")
-            break
-          
-    visualize_loss(train_mses, train_maes, val_mses, val_maes)
+            val_mse, val_mae, preds, trues   = test(args, model, deepspeed_engine)
+            val_mses.append(val_mse)
+            val_maes.append(val_mae)
+            early_stopping(val_mae, model, "./")
+            if early_stopping.early_stop: #stuff done each time early-stoppimg is hit (next set until done)
+                print("Early stopping")
+                print("season: " + str(season) + " episode: " + str(episode))
+                visualize_predictions(preds, trues)       
+                visualize_loss(train_mses, train_maes, val_mses, val_maes)
 
+                goodshit = [train_mses, train_maes, val_mses, val_maes, preds, trues]
+                goodest_shit.append(goodshit)
+
+                if episode == 7 and season == 4:
+                  break
+                elif episode == 7:
+                  season += 1
+                  episode = 0
+                else:
+                  episode+=1
+            if episode == 7 and season == 4:
+                  break
+                
+    visualize_predictions(preds, trues)       
+    visualize_loss(train_mses, train_maes, val_mses, val_maes)
     print(torch.cuda.max_memory_allocated())
 
 
 def main():
     parser = build_parser()
     args = parser.parse_args(None)
-    preform_experiment(args)
+    run(args)
 
 if __name__ == '__main__':
     main()

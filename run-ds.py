@@ -15,24 +15,14 @@ q = multiprocessing.Queue()
 p = Process(target=resultServer, args=[conf, q])
 p.start()
 
-if conf.deepspeed:
-    sys.argv.extend(['train.py', '--deepspeed_config', 'settings/ds_config.json'])
-    conf.extend_argv()
-    setting_argv = sys.argv.copy()
-    for run_num in range(conf.exps):
-        sys.argv.clear()
-        sys.argv.extend(setting_argv)
-        sys.argv.extend(["--run_num", str(run_num + 1)])
-        ds_runer.main()
-else:
-    conf.extend_argv()
-    setting_argv = sys.argv.copy()
-    for run_num in range(conf.exps):
-        sys.argv.clear()
-        sys.argv.extend(setting_argv)
-        sys.argv.extend(["--run_num", str(run_num + 1)])
-        import train
+sys.argv.extend(['train.py', '--deepspeed_config', 'settings/ds_config.json'])
+conf.extend_argv()
+setting_argv = sys.argv.copy()
 
-        train.main()
+for run_num in range(conf.exps):
+    sys.argv.clear()
+    sys.argv.extend(setting_argv)
+    sys.argv.extend(["--run_num", str(run_num + 1)])
+    ds_runer.main()
 
 rfq = q.get()
