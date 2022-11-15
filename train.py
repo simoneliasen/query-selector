@@ -10,7 +10,7 @@ import torch.nn as nn
 
 from settings.config import build_parser
 from model import Transformer
-from data.data_loader import Dataset_ETT_hour
+from data.data_loader import Dataset_ETT_hour, Dataset_NoBorders
 from utils.tools import metric, EarlyStopping, visualize_loss, visualize_predictions
 
 
@@ -81,33 +81,31 @@ def test(args, model, deepspeed_engine):
     best_model_path = 'checkpoints/checkpoint.pth'
     model.load_state_dict(torch.load(best_model_path)) 
 
-    if args.debug:
-        model.record()
+    Data = Dataset_NoBorders
 
-    test_data, test_loader = _get_data(args, flag='test')
+    shuffle_flag = False;
+    drop_last = True;
+    batch_size = 1
+    freq = args.freq
 
-    if deepspeed:
-        model.inference()
-    else:
-        model.eval()
+    test_data = Data(
+        root_path='data',
+        data_path=args.data+'.csv',
+        flag='test',
+        size=[args.seq_len, 0, args.pred_len],
+        features=args.features,
+        target=args.target,
+        inverse=args.inverse,
+    )
 
-    v_preds, v_trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
-    mse, mae = run_metrics("Loss for validation set ", v_preds, v_trues)
+    print('test', len(test_data))
 
-    visualize_predictions(v_preds,v_trues)
-
-    #Set back to training (does not handle model.inference)
-    model.train()
-
-    return mse, mae 
-
-
-def validate(args, model, deepspeed_engine):
-    
-    if args.debug:
-        model.record()
-
-    test_data, test_loader = _get_data(args, flag='test')
+    test_loader = DataLoader(
+        test_data,
+        batch_size=batch_size,
+        shuffle=shuffle_flag,
+        num_workers=args.num_workers,
+        drop_last=drop_last)
 
     if deepspeed:
         model.inference()

@@ -128,13 +128,8 @@ class Dataset_NoBorders(Dataset):
 
         self.root_path = root_path
 
-        if flag == 'train':
-            self.data_path = 'training.csv'
-        elif flag == 'test':
-            self.data_path = 'validation.csv'
-        else:
-          print("issue med csv init")
-
+        data_path = 'training.csv'
+  
         self.__read_data__()
 
     def __read_data__(self):
@@ -165,7 +160,7 @@ class Dataset_NoBorders(Dataset):
         else:
             self.data_y = data[:]
             if self.features == "MS":
-              self.data_y = self.data_y[:, [target_index]]
+                self.data_y = self.data_y[:, 0:3] #three outputs (first three columns)
             
         self.data_stamp = data_stamp
     
