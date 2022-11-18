@@ -97,14 +97,14 @@ class EarlyStopping:
 
         if season == 1 and episode == 1: #init json with first values
             with open('data/datasave.json','w+') as file1: 
-            file_data = {}
-            file_data["s" + str(season) + "e" + str(episode)] = {}
-            file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
-            file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
-            file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = unscaled_preds
-            file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = unscaled_truths
-            json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
-            file1.close()
+                file_data = {}
+                file_data["s" + str(season) + "e" + str(episode)] = {}
+                file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
+                file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
+                file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = unscaled_preds
+                file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = unscaled_truths
+                json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
+                file1.close()
         else: #continiusly update w. best values if exist or else add if it does not exist yet
             filename = 'data/datasave.json'
             with open(filename, 'r') as f:
