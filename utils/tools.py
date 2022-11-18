@@ -72,7 +72,7 @@ class EarlyStopping:
     def save_data(self, season, episode, val_mse, val_mae, preds, trues):
 
       if season == 1 and episode == 1:
-        with open('datasave.json','w+') as file1: 
+        with open('data/datasave.json','w+') as file1: 
           file_data = {}
           file_data["s" + str(season) + "e" + str(episode)] = {}
           file_data["s" + str(season) + "e" + str(episode)]["val_mse"] = float(val_mse)
@@ -82,7 +82,7 @@ class EarlyStopping:
           json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
           file1.close()
       else:
-        filename = 'datasave.json'
+        filename = 'data/datasave.json'
         with open(filename, 'r') as f:
             file_data = json.load(f)
             file_data["s" + str(season) + "e" + str(episode)] = {}
