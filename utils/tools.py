@@ -69,16 +69,16 @@ class EarlyStopping:
         self.val_loss_min = val_loss
 
     
-    def save_data(self, season, episode, val_mse, val_mae, preds, trues):
+    def save_data(self, season, episode, RMSE, MAE, prediction, truth):
 
       if season == 1 and episode == 1:
         with open('data/datasave.json','w+') as file1: 
           file_data = {}
           file_data["s" + str(season) + "e" + str(episode)] = {}
-          file_data["s" + str(season) + "e" + str(episode)]["val_mse"] = float(val_mse)
-          file_data["s" + str(season) + "e" + str(episode)]["val_mae"] = float(val_mae)
-          file_data["s" + str(season) + "e" + str(episode)]["preds"] = preds
-          file_data["s" + str(season) + "e" + str(episode)]["trues"] = trues
+          file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
+          file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
+          file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = prediction
+          file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = truth
           json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
           file1.close()
       else:
@@ -86,10 +86,10 @@ class EarlyStopping:
         with open(filename, 'r') as f:
             file_data = json.load(f)
             file_data["s" + str(season) + "e" + str(episode)] = {}
-            file_data["s" + str(season) + "e" + str(episode)]["val_mse"] = float(val_mse)
-            file_data["s" + str(season) + "e" + str(episode)]["val_mae"] = float(val_mae)
-            file_data["s" + str(season) + "e" + str(episode)]["preds"] = preds
-            file_data["s" + str(season) + "e" + str(episode)]["trues"] = trues
+            file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
+            file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
+            file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = prediction
+            file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = truth
 
         os.remove(filename)
         with open(filename, 'w') as f:
