@@ -1,4 +1,5 @@
 
+from os import XATTR_REPLACE
 import time
 import matplotlib.pyplot as plt
 import numpy as np
@@ -140,7 +141,7 @@ def run(args):
     season = 1 #count what season 1-4
     episode = 1 #count what episode 1-7
 
-    early_stopping = EarlyStopping(patience=3, verbose=True)
+    early_stopping = EarlyStopping(patience=1, verbose=True)
 
     model = get_model(args)
     params = list(get_params(model))
@@ -172,12 +173,18 @@ def run(args):
         train_mses.append(train_mse)
         train_maes.append(train_mae)
         
-        if iter % 3 == 0:
+        if iter % 1 == 0:
             val_mse, val_mae, preds, trues = test(args, model, deepspeed_engine)
             val_mses.append(val_mse)
             val_maes.append(val_mae)
-            early_stopping(val_mae, model, "./")
+
+            early_stopping(season, episode, val_mse, val_mae, preds, trues, model, "./")
+            
             if early_stopping.early_stop: #stuff done each time early-stoppimg is hit (next set until done)
+                
+                #These are not the values to be saved, but the best in episode should
+                #if new season don't overwrite
+        
                 print("Early stopping")
                 print("season: " + str(season) + " episode: " + str(episode) + " done")
                 visualize_predictions(preds, trues)       
@@ -189,7 +196,7 @@ def run(args):
                   print("JUST HIT EPISODE 7 AND SEASON 4")
                   break
                 elif episode == 7: #reset model here
-                  early_stopping = EarlyStopping(patience=3, verbose=True)
+                  early_stopping = EarlyStopping(patience=1, verbose=True)
                   print("JUST RESETTED THE MODEL AND NEW TRAINING SET")
                   season += 1
                   episode = 1
@@ -217,7 +224,7 @@ def run(args):
                       model.optim = Adam(params, lr=0.001)
 
                 else: #new training-set, not new model
-                  early_stopping = EarlyStopping(patience=3, verbose=True)
+                  early_stopping = EarlyStopping(patience=1, verbose=True)
                   episode+=1
 
                   if season == 1:
@@ -235,29 +242,20 @@ def run(args):
 
             if episode == 8 and season == 4: #+1 episode as episode +1 is inserted in end
                   print("I thinking it fucking worked ma ggg")
-                  print("I thinking it fucking worked ma ggg")
-                  print("I thinking it fucking worked ma ggg")
-                  print("I thinking it fucking worked ma ggg")
                   break
-                
+   
     #visualize_predictions(preds, trues)       
-   # visualize_loss(train_mses, train_maes, val_mses, val_maes)
+    #visualize_loss(train_mses, train_maes, val_mses, val_maes)
     print(torch.cuda.max_memory_allocated())
 
-    print("val_mses")
-    print(len(goodest_shit[0]))
-    print("val_maes")
-    print(len(goodest_shit[1]))
-    print("preds")
-    print(len(goodest_shit[2]))
-    print("trues")
-    print(len(goodest_shit[3]))
+  
+
 
 
 def main():
     parser = build_parser()
     args = parser.parse_args(None)
     run(args)
-
+  
 if __name__ == '__main__':
     main()

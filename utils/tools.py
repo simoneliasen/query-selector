@@ -2,6 +2,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import os
+import json
+from json.decoder import JSONDecodeError
+from json import JSONEncoder
 
 
 def adjust_learning_rate(optimizer, epoch, args):
@@ -20,6 +24,12 @@ def adjust_learning_rate(optimizer, epoch, args):
         print('Updating learning rate to {}'.format(lr))
 
 
+class NumpyArrayEncoder(JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.ndarray):
+            return obj.tolist()
+        return JSONEncoder.default(self, obj)
+
 class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0):
         self.patience = patience
@@ -29,20 +39,27 @@ class EarlyStopping:
         self.early_stop = False
         self.val_loss_min = np.Inf
         self.delta = delta
+        self.episode_count = 0
 
-    def __call__(self, val_loss, model, path):
-        score = -val_loss
+    def __call__(self, season, episode, val_mse, val_mae, preds, trues, model, path):
+        score = -val_mae
         if self.best_score is None:
             self.best_score = score
-            self.save_checkpoint(val_loss, model, path)
+            self.save_checkpoint(val_mae, model, path)
+            self.save_data(season, episode, val_mse, val_mae, preds, trues)
         elif score < self.best_score + self.delta:
+            if self.episode_count == 0:
+              self.save_checkpoint(val_mae, model, path)
+              self.save_data(season, episode, val_mse, val_mae, preds, trues)
             self.counter += 1
+            self.episode_count +=1
             print(f'EarlyStopping counter: {self.counter} out of {self.patience}')
             if self.counter >= self.patience:
                 self.early_stop = True
         else:
             self.best_score = score
-            self.save_checkpoint(val_loss, model, path)
+            self.save_checkpoint(val_mae, model, path)
+            self.save_data(season, episode, val_mse, val_mae, preds, trues)
             self.counter = 0
 
     def save_checkpoint(self, val_loss, model, path):
@@ -50,6 +67,33 @@ class EarlyStopping:
             print(f'Validation loss decreased ({self.val_loss_min:.6f} --> {val_loss:.6f}).  Saving model ...')
         torch.save(model.state_dict(), path+'/checkpoints/'+'checkpoint.pth')
         self.val_loss_min = val_loss
+
+    
+    def save_data(self, season, episode, val_mse, val_mae, preds, trues):
+
+      if season == 1 and episode == 1:
+        with open('datasave.json','w+') as file1: 
+          file_data = {}
+          file_data["s" + str(season) + "e" + str(episode)] = {}
+          file_data["s" + str(season) + "e" + str(episode)]["val_mse"] = float(val_mse)
+          file_data["s" + str(season) + "e" + str(episode)]["val_mae"] = float(val_mae)
+          file_data["s" + str(season) + "e" + str(episode)]["preds"] = preds
+          file_data["s" + str(season) + "e" + str(episode)]["trues"] = trues
+          json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
+          file1.close()
+      else:
+        filename = 'datasave.json'
+        with open(filename, 'r') as f:
+            file_data = json.load(f)
+            file_data["s" + str(season) + "e" + str(episode)] = {}
+            file_data["s" + str(season) + "e" + str(episode)]["val_mse"] = float(val_mse)
+            file_data["s" + str(season) + "e" + str(episode)]["val_mae"] = float(val_mae)
+            file_data["s" + str(season) + "e" + str(episode)]["preds"] = preds
+            file_data["s" + str(season) + "e" + str(episode)]["trues"] = trues
+
+        os.remove(filename)
+        with open(filename, 'w') as f:
+            json.dump(file_data, f, indent=4, cls=NumpyArrayEncoder)
 
 
 class dotdict(dict):
