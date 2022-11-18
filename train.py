@@ -67,7 +67,7 @@ def run_metrics(caption, preds, trues):
 
     mae, mse, rmse, mape, mspe = metric(preds, trues)
     print('{} ; MSE: {}, MAE: {}'.format(caption, mse, mae))
-    return mse, mae
+    return rmse, mae #NOTE: ALL MSE MENTIONS IS CODE IS ACTUALLY RMSE
 
 
 def run_iteration(model, loader, args, training=True, message = ''):
