@@ -71,25 +71,49 @@ class EarlyStopping:
     
     def save_data(self, season, episode, RMSE, MAE, prediction, truth):
 
-      if season == 1 and episode == 1:
-        with open('data/datasave.json','w+') as file1: 
-          file_data = {}
-          file_data["s" + str(season) + "e" + str(episode)] = {}
-          file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
-          file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
-          file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = prediction
-          file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = truth
-          json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
-          file1.close()
-      else:
-        filename = 'data/datasave.json'
-        with open(filename, 'r') as f:
-            file_data = json.load(f)
+        #unscale predictions and truths
+        s = np.load('settings/std.npy')
+        m = np.load('settings/mean.npy')
+
+        unscaled_preds = []
+        for x in prediction:
+            for y in x:
+                for z in y:
+                    predder = []
+                    predder.append((z[0]  * s[0]) + m[0])
+                    predder.append((z[1] * s[1]) + m[1])
+                    predder.append((z[2] * s[2]) + m[2])
+                    unscaled_preds.append(predder)
+        
+        unscaled_truths = []
+        for x in truth:
+            for y in x:
+                for z in y:
+                    truther = []
+                    truther.append((z[0]  * s[0]) + m[0])
+                    truther.append((z[1] * s[1]) + m[1])
+                    truther.append((z[2] * s[2]) + m[2])
+                    unscaled_truths.append(truther)
+
+        if season == 1 and episode == 1: #init json with first values
+            with open('data/datasave.json','w+') as file1: 
+            file_data = {}
             file_data["s" + str(season) + "e" + str(episode)] = {}
             file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
             file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
-            file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = prediction
-            file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = truth
+            file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = unscaled_preds
+            file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = unscaled_truths
+            json.dump(file_data, file1, indent=4, cls=NumpyArrayEncoder)
+            file1.close()
+        else: #continiusly update w. best values if exist or else add if it does not exist yet
+            filename = 'data/datasave.json'
+            with open(filename, 'r') as f:
+                file_data = json.load(f)
+                file_data["s" + str(season) + "e" + str(episode)] = {}
+                file_data["s" + str(season) + "e" + str(episode)]["RMSE"] = float(RMSE)
+                file_data["s" + str(season) + "e" + str(episode)]["MAE"] = float(MAE)
+                file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = unscaled_preds
+                file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = unscaled_truths
 
         os.remove(filename)
         with open(filename, 'w') as f:

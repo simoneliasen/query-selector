@@ -10,7 +10,6 @@ conf.extend_argv()
 setting_argv = sys.argv.copy()
 
 for run_num in range(conf.exps):
-    print("running")
     sys.argv.clear()
     sys.argv.extend(setting_argv)
     sys.argv.extend(["--run_num", str(run_num + 1)])
