@@ -1,6 +1,5 @@
 import time
 from multiprocessing import Pool
-
 import numpy
 import numpy as np
 import torch

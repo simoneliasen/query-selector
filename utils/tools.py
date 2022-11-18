@@ -4,7 +4,6 @@ import numpy as np
 import torch
 import os
 import json
-from json.decoder import JSONDecodeError
 from json import JSONEncoder
 
 
@@ -29,6 +28,7 @@ class NumpyArrayEncoder(JSONEncoder):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
         return JSONEncoder.default(self, obj)
+
 
 class EarlyStopping:
     def __init__(self, patience=7, verbose=False, delta=0):

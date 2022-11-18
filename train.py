@@ -46,14 +46,14 @@ def _get_data(args, flag):
         inverse=args.inverse,
     )
 
-    print(flag, len(data_set))
-
     data_loader = DataLoader(
         data_set,
         batch_size=batch_size,
         shuffle=shuffle_flag,
         num_workers=args.num_workers,
         drop_last=drop_last)
+
+    print(flag, len(data_set))
 
     return data_set, data_loader
 
@@ -165,7 +165,6 @@ def run(args):
     train_maes = []
     val_mses = []
     val_maes = []
-    goodest_shit = []
 
     for iter in range(1, args.iterations + 1):
         preds, trues = run_iteration(deepspeed_engine if args.deepspeed else model , train_loader, args, training=True, message=' Run {:>3}, iteration: {:>3}:  '.format(args.run_num, iter))
@@ -180,17 +179,13 @@ def run(args):
 
             early_stopping(season, episode, val_mse, val_mae, preds, trues, model, "./")
             
-            if early_stopping.early_stop: #stuff done each time early-stoppimg is hit (next set until done)
-                
-                #These are not the values to be saved, but the best in episode should
-                #if new season don't overwrite
-        
+            if early_stopping.early_stop: 
+     
                 print("Early stopping")
-                print("season: " + str(season) + " episode: " + str(episode) + " done")
+                print("Season: " + str(season) + " Episode: " + str(episode) + " Done")
+
                 visualize_predictions(preds, trues)       
                 visualize_loss(train_mses, train_maes, val_mses, val_maes)
-                goodshit = [val_mses, val_maes, preds, trues]
-                goodest_shit.append(goodshit)
               
                 if episode == 7 and season == 4: 
                   print("JUST HIT EPISODE 7 AND SEASON 4")
@@ -214,9 +209,9 @@ def run(args):
                   print(args.data)
 
                   train_data, train_loader = _get_data(args, flag='train')
-
                   model = get_model(args)
                   params = list(get_params(model))
+
                   if args.deepspeed:
                       deepspeed_engine, optimizer, _, _ = deepspeed.initialize(args=args, model=model, model_parameters=params)
                   else:
@@ -244,18 +239,17 @@ def run(args):
                   print("I thinking it fucking worked ma ggg")
                   break
    
-    #visualize_predictions(preds, trues)       
-    #visualize_loss(train_mses, train_maes, val_mses, val_maes)
     print(torch.cuda.max_memory_allocated())
 
-  
-
+    #visualize_predictions(preds, trues)       
+    #visualize_loss(train_mses, train_maes, val_mses, val_maes)
 
 
 def main():
     parser = build_parser()
     args = parser.parse_args(None)
     run(args)
+  
   
 if __name__ == '__main__':
     main()
