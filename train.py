@@ -9,7 +9,7 @@ from torch.utils.data import DataLoader
 import deepspeed
 import torch.nn as nn
 from settings.config import build_parser
-from model import Transformer
+from model.model import Transformer
 from data.data_loader import Dataset
 from utils.tools import metric, EarlyStopping, visualize_loss, visualize_predictions
 
