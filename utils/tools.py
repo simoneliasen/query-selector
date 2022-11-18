@@ -115,9 +115,9 @@ class EarlyStopping:
                 file_data["s" + str(season) + "e" + str(episode)]["Predictions"] = unscaled_preds
                 file_data["s" + str(season) + "e" + str(episode)]["Ground Truth"] = unscaled_truths
 
-        os.remove(filename)
-        with open(filename, 'w') as f:
-            json.dump(file_data, f, indent=4, cls=NumpyArrayEncoder)
+            os.remove(filename)
+            with open(filename, 'w') as f:
+                json.dump(file_data, f, indent=4, cls=NumpyArrayEncoder)
 
 
 class dotdict(dict):
