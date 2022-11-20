@@ -141,7 +141,7 @@ def run(args):
     season = 1 #count what season 1-4
     episode = 1 #count what episode 1-7
 
-    early_stopping = EarlyStopping(patience=1, verbose=True)
+    early_stopping = EarlyStopping(patience=3, verbose=True)
 
     model = get_model(args)
     params = list(get_params(model))
@@ -172,7 +172,7 @@ def run(args):
         train_mses.append(train_mse)
         train_maes.append(train_mae)
         
-        if iter % 1 == 0:
+        if iter % 3 == 0:
             val_mse, val_mae, preds, trues = test(args, model, deepspeed_engine)
             val_mses.append(val_mse)
             val_maes.append(val_mae)
@@ -191,7 +191,7 @@ def run(args):
                   print("JUST HIT EPISODE 7 AND SEASON 4")
                   break
                 elif episode == 7: #reset model here
-                  early_stopping = EarlyStopping(patience=1, verbose=True)
+                  early_stopping = EarlyStopping(patience=3, verbose=True)
                   print("JUST RESETTED THE MODEL AND NEW TRAINING SET")
                   season += 1
                   episode = 1
@@ -219,7 +219,7 @@ def run(args):
                       model.optim = Adam(params, lr=0.001)
 
                 else: #new training-set, not new model
-                  early_stopping = EarlyStopping(patience=1, verbose=True)
+                  early_stopping = EarlyStopping(patience=3, verbose=True)
                   episode+=1
 
                   if season == 1:
@@ -236,7 +236,7 @@ def run(args):
                   train_data, train_loader = _get_data(args, flag='train')
 
             if episode == 8 and season == 4: #+1 episode as episode +1 is inserted in end
-                  print("I thinking it fucking worked ma ggg")
+                  print("I think it worked worked")
                   break
    
     print(torch.cuda.max_memory_allocated())
