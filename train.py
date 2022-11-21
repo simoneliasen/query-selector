@@ -128,6 +128,32 @@ def test(args, model, deepspeed_engine):
         model.eval()
 
     preds, trues = run_iteration(deepspeed_engine if args.deepspeed else model, test_loader, args, training=False, message="Validation set")
+    
+    #Unscale predictions + truths to get non-normalized MAE and MSE
+    s = np.load('settings/std.npy')
+    m = np.load('settings/mean.npy')
+
+    unscaled_preds = []
+    for x in preds:
+        for y in x:
+            for z in y:
+                predder = []
+                predder.append((z[0]  * s[0]) + m[0])
+                predder.append((z[1] * s[1]) + m[1])
+                predder.append((z[2] * s[2]) + m[2])
+                unscaled_preds.append(predder)
+        
+    unscaled_truths = []
+    for x in trues:
+        for y in x:
+            for z in y:
+                truther = []
+                truther.append((z[0]  * s[0]) + m[0])
+                truther.append((z[1] * s[1]) + m[1])
+                truther.append((z[2] * s[2]) + m[2])
+                unscaled_truths.append(truther)
+
+    #Get MSE and MAE
     test_mse, test_mae = run_metrics("Loss after iteration {}".format(iter), preds, trues)
 
     visualize_predictions(preds, trues)
