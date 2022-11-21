@@ -154,7 +154,7 @@ def test(args, model, deepspeed_engine):
                 unscaled_truths.append(truther)
 
     #Get MSE and MAE
-    test_mse, test_mae = run_metrics("Loss after iteration {}".format(iter), preds, trues)
+    test_mse, test_mae = run_metrics("Loss after iteration {}".format(iter), unscaled_preds, unscaled_truths)
 
     visualize_predictions(preds, trues)
 
